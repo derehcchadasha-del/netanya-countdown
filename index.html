@@ -1,1 +1,673 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Safety refresh: once per hour -->
+  <meta http-equiv="refresh" content="3600">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+  <title>ספירה לאחור לפתיחת הקלפיות</title>
+
+  <style>
+    :root{
+      --bg: #050c26;
+      --bg-hero: linear-gradient(135deg, rgb(6,147,227) 0%, rgb(155,81,224) 100%);
+      --fg: #f7f9ff;
+      --muted: rgba(247,249,255,0.82);
+      --accent: #f2c14e;
+      --accent-2: #58b2ff;
+      --card: rgba(255,255,255,0.06);
+      --card-border: rgba(242,193,78,0.55);
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Assistant", "Segoe UI", Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    body{
+      position: relative;
+      isolation: isolate;
+      background-image: var(--bg-hero);
+      background-size: cover;
+    }
+
+    /* No photo background; keep gradient only */
+
+    /* Title background accent behind the main heading */
+    .title-wrap{
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1vh;
+      padding: 18px 22px;
+      isolation: isolate;
+    }
+    .title-wrap::before{
+      content: "";
+      position: absolute;
+      inset: -6% 0 0 0;
+      background-image: url("https://avislama.co.il/wp-content/uploads/2025/12/Vector-1.png");
+      background-position: center right;
+      background-repeat: no-repeat;
+      background-size: contain;
+      opacity: 0.28;
+      mix-blend-mode: screen;
+      z-index: 0;
+      pointer-events: none;
+      transition: background 0.3s ease, transform 0.4s ease;
+    }
+    .title-wrap:hover::before{
+      transform: translateY(-2px);
+      opacity: 0.32;
+    }
+    .title-wrap > *{ position: relative; z-index: 1; }
+
+    .wrap{
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: clamp(18px, 2.5vh, 42px);
+      padding: clamp(24px, 3.5vh, 60px) clamp(16px, 2.5vw, 48px);
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .title{
+      font-size: clamp(32px, 4.2vw, 88px);
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      line-height: 1.1;
+      color: var(--fg);
+      text-shadow: 0 10px 26px rgba(0,0,0,0.32);
+    }
+
+    .subtitle{
+      font-size: clamp(18px, 2.2vw, 42px);
+      color: var(--accent);
+      margin-top: 0.6vh;
+      font-weight: 700;
+    }
+
+    .board{
+      position: relative;
+      width: min(95vw, 1100px);
+      padding: clamp(12px, 1.8vw, 28px);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 26px 54px rgba(0,0,0,0.28);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+      margin: auto 0;
+    }
+
+    .board::after{
+      content: "";
+      position: absolute;
+      inset: 10% 4% auto 4%;
+      height: 28%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.09), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(10px);
+    }
+
+    .grid{
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(100px, 1fr));
+      gap: clamp(10px, 1.8vw, 24px);
+      justify-items: center;
+      align-items: center;
+    }
+
+    /* Ballot-style cards */
+    .card{
+      position: relative;
+      border: 1.8px solid rgba(0,0,0,0.9);
+      border-radius: 10px;
+      padding: clamp(12px, 1.8vh, 24px) clamp(10px, 1.4vw, 18px);
+      background: rgba(246,236,19,0.8);
+      box-shadow: 0 18px 34px rgba(0,0,0,0.22);
+      overflow: hidden;
+      aspect-ratio: 7 / 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: clamp(126px, 14vw, 210px);
+      height: auto;
+      max-width: 210px;
+      color: #000;
+      text-align: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .card::after{ display: none; }
+
+    .num{
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(28px, 4.2vw, 84px);
+      font-weight: 800;
+      line-height: 1;
+      color: #000;
+      text-shadow: none;
+    }
+
+    .label{
+      margin-top: 1vh;
+      font-size: clamp(11px, 1.2vw, 22px);
+      color: #000;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .footer{
+      margin-top: clamp(14px, 1.8vw, 26px);
+      font-size: clamp(18px, 2.4vw, 42px);
+      font-weight: 800;
+      color: #ffffff;
+      backdrop-filter: blur(3px);
+      text-shadow: 
+        -1.5px -1.5px 0 #000,
+         1.5px -1.5px 0 #000,
+        -1.5px  1.5px 0 #000,
+         1.5px  1.5px 0 #000,
+        -2px  0 0 #000,
+         2px  0 0 #000,
+         0  -2px 0 #000,
+         0   2px 0 #000;
+    }
+
+    .done .card{
+      opacity: 0.2;
+    }
+    .doneMessage{
+      font-size: clamp(30px, 4.2vw, 76px);
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 10px 28px rgba(0,0,0,0.35);
+    }
+
+    .closedMessage{
+      font-size: clamp(32px, 4.6vw, 86px);
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 10px 28px rgba(0,0,0,0.35);
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink{
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @media (min-width: 1700px){
+      .board{ width: min(1100px, 86vw); }
+      .grid{ gap: clamp(14px, 1.6vw, 28px); }
+      .card{ height: clamp(140px, 14vw, 280px); }
+      .num{ font-size: clamp(36px, 4.8vw, 96px); }
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      .wrap{ gap: 3vh; }
+      .board{ width: 100%; }
+    }
+
+    @media (max-width: 768px){
+      .title-wrap::before{ opacity: 0.18; }
+      .title{ font-size: clamp(28px, 4vw, 72px); }
+      .subtitle{ font-size: clamp(16px, 2.2vw, 36px); }
+    }
+
+    @media (max-width: 600px){
+      .wrap{ gap: 2.4vh; padding: clamp(24px, 4vh, 60px) clamp(16px, 4vw, 48px); }
+      .grid{ grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .card{ height: clamp(160px, 35vw, 240px); padding: clamp(14px, 2vh, 24px) clamp(10px, 1.5vw, 18px); }
+      .num{ font-size: clamp(38px, 6vw, 96px); }
+      .label{ font-size: clamp(12px, 1.6vw, 24px); margin-top: 1.2vh; }
+      .board{ padding: clamp(14px, 2.4vw, 28px); }
+      .footer{ font-size: clamp(14px, 1.6vw, 26px); margin-top: clamp(12px, 1.8vw, 20px); }
+      .title-wrap{ padding: clamp(12px, 2vw, 18px); gap: 0.8vh; }
+    }
+
+    @media (max-width: 500px){
+      .wrap{ gap: 2vh; padding: clamp(16px, 3vh, 48px) clamp(12px, 3vw, 36px); }
+      .grid{ grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card{ height: clamp(150px, 40vw, 220px); padding: clamp(12px, 1.8vh, 20px) clamp(10px, 1.4vw, 16px); }
+      .num{ font-size: clamp(36px, 6.5vw, 92px); }
+      .label{ font-size: clamp(13px, 1.8vw, 22px); margin-top: 1.2vh; }
+      .title{ font-size: clamp(26px, 4vw, 54px); }
+      .subtitle{ font-size: clamp(14px, 2.2vw, 28px); }
+      .board{ padding: clamp(12px, 2vw, 20px); }
+      .footer{ font-size: clamp(13px, 1.6vw, 22px); }
+    }
+
+    @media (max-width: 360px){
+      .wrap{ padding: clamp(12px, 2.5vh, 40px) clamp(10px, 2.5vw, 28px); gap: 1.6vh; }
+      .grid{ gap: 8px; }
+      .card{ padding: clamp(10px, 1.5vh, 18px) clamp(8px, 1vw, 14px); }
+      .num{ font-size: clamp(32px, 5.5vw, 72px); }
+      .label{ font-size: clamp(11px, 1.4vw, 18px); }
+      .title{ font-size: clamp(22px, 3vw, 44px); }
+      .subtitle{ font-size: clamp(12px, 1.8vw, 22px); }
+    }
+
+    /* Mobile landscape orientation - larger screens */
+    @media (max-height: 600px) and (orientation: landscape) and (min-width: 769px){
+      .wrap{ gap: 0.8vh; padding: clamp(6px, 1.2vh, 20px) clamp(10px, 2.5vw, 28px); justify-content: center; }
+      .title-wrap{ padding: clamp(5px, 0.6vh, 8px); gap: 0.2vh; }
+      .title{ font-size: clamp(18px, 2.4vw, 38px); letter-spacing: 0.3px; line-height: 1; }
+      .subtitle{ font-size: clamp(11px, 1.3vw, 20px); margin-top: 0.1vh; }
+      .board{ padding: clamp(6px, 1vw, 14px); margin-top: 0.5vh; }
+      .grid{ grid-template-columns: repeat(4, 1fr); gap: clamp(6px, 1.2vw, 14px); justify-items: center; }
+      .card{ height: clamp(100px, 14vh, 140px); padding: clamp(8px, 1vh, 12px) clamp(6px, 0.8vw, 10px); max-width: 140px; }
+      .num{ font-size: clamp(24px, 3.8vw, 60px); }
+      .label{ font-size: clamp(9px, 1vw, 16px); margin-top: 0.4vh; }
+      .footer{ font-size: clamp(10px, 1vw, 18px); margin-top: clamp(4px, 0.8vh, 8px); }
+    }
+
+    /* Small screens portrait (up to 600px width) - single card with all values */
+    @media (max-width: 600px) and (orientation: portrait){
+      .board{
+        padding: clamp(10px, 2vh, 16px) clamp(12px, 3vw, 20px);
+      }
+      .grid{ 
+        display: flex;
+        flex-direction: column;
+        gap: clamp(5px, 1.2vh, 10px); 
+        max-width: 320px;
+        margin: 0 auto;
+        background: rgba(246,236,19,0.8);
+        border: 1.8px solid rgba(0,0,0,0.9);
+        border-radius: 12px;
+        padding: clamp(10px, 2vh, 16px);
+      }
+      .card{ 
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        height: auto; 
+        aspect-ratio: auto;
+        padding: clamp(4px, 0.8vh, 8px) 0;
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(12px, 3vw, 18px);
+      }
+      .num{ font-size: clamp(28px, 6vw, 52px); font-weight: 800; color: #000; }
+      .label{ font-size: clamp(13px, 2.2vw, 24px); margin-top: 0; font-weight: 700; color: #000; }
+    }
+
+    /* Small screens landscape (9 inch and below) - single card with all values */
+    @media (max-height: 600px) and (orientation: landscape) and (max-width: 768px){
+      .board{
+        /* The board itself becomes the single card */
+        padding: clamp(8px, 1.5vh, 14px) clamp(12px, 3vw, 20px);
+      }
+      .grid{ 
+        /* Grid becomes container inside single card - no backgrounds on individual cards */
+        display: flex;
+        flex-direction: column;
+        gap: clamp(4px, 1vh, 8px); 
+        max-width: 300px;
+        margin: 0 auto;
+        background: rgba(246,236,19,0.8);
+        border: 1.8px solid rgba(0,0,0,0.9);
+        border-radius: 12px;
+        padding: clamp(8px, 1.5vh, 14px);
+      }
+      .card{ 
+        /* Remove card styling - just rows of text */
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        height: auto; 
+        aspect-ratio: auto;
+        padding: clamp(3px, 0.5vh, 6px) 0;
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(10px, 2.5vw, 16px);
+      }
+      .num{ font-size: clamp(20px, 3.5vw, 46px); font-weight: 800; color: #000; }
+      .label{ font-size: clamp(11px, 1.5vw, 20px); margin-top: 0; font-weight: 700; color: #000; }
+    }
+
+    /* Tablet and larger landscape */
+    @media (max-height: 800px) and (orientation: landscape) and (min-width: 900px){
+      .grid{ grid-template-columns: repeat(4, minmax(100px, 1fr)); }
+    }
+
+    /* Very small portrait phones */
+    @media (max-width: 380px) and (orientation: portrait){
+      .wrap{ gap: 1.4vh; padding: clamp(12px, 2.2vh, 32px) clamp(10px, 2vw, 24px); }
+      .grid{ grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .card{ height: clamp(140px, 32vw, 200px); padding: clamp(10px, 1.4vh, 16px) clamp(8px, 1.2vw, 12px); }
+      .num{ font-size: clamp(32px, 5.8vw, 80px); }
+      .label{ font-size: clamp(11px, 1.5vw, 20px); }
+      .title{ font-size: clamp(22px, 3.2vw, 46px); }
+      .subtitle{ font-size: clamp(12px, 1.9vw, 24px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="root">
+    <div class="title-wrap">
+      <div class="title">ספירה לאחור לפתיחת הקלפיות</div>
+      <div class="subtitle">יום שלישי • 20/01/2026 • 07:00</div>
+    </div>
+
+    <div class="board">
+      <div class="grid" id="grid">
+        <div class="card">
+          <div class="num" id="days">--</div>
+          <div class="label">ימים</div>
+        </div>
+        <div class="card">
+          <div class="num" id="hours">--</div>
+          <div class="label">שעות</div>
+        </div>
+        <div class="card">
+          <div class="num" id="minutes">--</div>
+          <div class="label">דקות</div>
+        </div>
+        <div class="card">
+          <div class="num" id="seconds">--</div>
+          <div class="label">שניות</div>
+        </div>
+      </div>
+
+      <div class="footer" id="footer"></div>
+    </div>
+  </div>
+
+  <script>
+    // Targets: open at 07:00, close at 22:00 (Israel time, winter offset +02:00)
+    const TARGET_OPEN_ISO = "2026-01-20T07:00:00+02:00";
+    const TARGET_CLOSE_ISO = "2026-01-20T22:00:00+02:00";
+    let targetOpen = new Date("2026-01-20T07:00:00+02:00");
+    let targetClose = new Date("2026-01-20T22:00:00+02:00");
+    const phaseOpen = "open";
+    const phaseClose = "close";
+    const elDays = document.getElementById("days");
+    const elHours = document.getElementById("hours");
+    const elMinutes = document.getElementById("minutes");
+    const elSeconds = document.getElementById("seconds");
+    const footer = document.getElementById("footer");
+    const root = document.getElementById("root");
+    const grid = document.getElementById("grid");
+    const titleEl = document.querySelector(".title");
+    const subtitleEl = document.querySelector(".subtitle");
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+
+    function update() {
+      const now = new Date();
+      
+      // Helper function to format Hebrew date for a specific date
+      function getHebrewDateStringForDate(date) {
+        try {
+          const hebrewFmt = new Intl.DateTimeFormat("he-IL-u-ca-hebrew", {
+            timeZone: "Asia/Jerusalem",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          });
+          const hebrewDate = hebrewFmt.format(date);
+          
+          function numberToHebrew(num) {
+            const hebrewLetters = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י',
+              'יא', 'יב', 'יג', 'יד', 'טו', 'טז', 'יז', 'יח', 'יט', 'כ',
+              'כא', 'כב', 'כג', 'כד', 'כה', 'כו', 'כז', 'כח', 'כט', 'ל'];
+            return hebrewLetters[num] || num;
+          }
+          
+          function yearToHebrew(yearNum) {
+            const thousands = 'ה';
+            const remaining = yearNum % 1000;
+            const hundreds = Math.floor(remaining / 100);
+            const tens = Math.floor((remaining % 100) / 10);
+            const ones = remaining % 10;
+            
+            const hundreds_map = {
+              1: 'ק', 2: 'ר', 3: 'ש', 4: 'ת', 5: 'תק',
+              6: 'תר', 7: 'תש', 8: 'תת', 9: 'תתק'
+            };
+            
+            const tens_map = {
+              1: 'י', 2: 'כ', 3: 'ל', 4: 'מ', 5: 'נ',
+              6: 'ס', 7: 'ע', 8: 'פ', 9: 'צ'
+            };
+            
+            const ones_map = {
+              1: 'א', 2: 'ב', 3: 'ג', 4: 'ד', 5: 'ה',
+              6: 'ו', 7: 'ז', 8: 'ח', 9: 'ט'
+            };
+            
+            let result = '';
+            if (hundreds > 0) result += hundreds_map[hundreds];
+            if (tens > 0) result += tens_map[tens];
+            if (ones > 0) result += ones_map[ones];
+            
+            if (result.length > 1) {
+              result = result.slice(0, -1) + '״' + result.slice(-1);
+            }
+            
+            return thousands + '\'' + result;
+          }
+          
+          const hebrewParts = hebrewDate.split(' ');
+          if (hebrewParts.length >= 3) {
+            const hebrewDay = hebrewParts[0];
+            const hebrewMonth = hebrewParts[1];
+            const hebrewYear = hebrewParts[2];
+            
+            const dayNum = parseInt(hebrewDay);
+            let dayHebrew = '';
+            if (dayNum > 10) {
+              const tens = numberToHebrew(Math.floor(dayNum / 10) * 10);
+              const ones = numberToHebrew(dayNum % 10);
+              dayHebrew = tens + '״' + ones;
+            } else {
+              dayHebrew = numberToHebrew(dayNum) + "'";
+            }
+            
+            const yearNum = parseInt(hebrewYear);
+            const yearHebrew = yearToHebrew(yearNum);
+            
+            return `${dayHebrew} ${hebrewMonth} ${yearHebrew}`;
+          }
+          return hebrewDate;
+        } catch {
+          return '';
+        }
+      }
+      
+      // Get Hebrew date for election day (20/01/2026)
+      const electionDate = new Date("2026-01-20T00:00:00+02:00");
+      const electionHebrewDate = getHebrewDateStringForDate(electionDate);
+      
+      let phaseTarget = targetOpen;
+      let phaseTitle = "ספירה לאחור לפתיחת הקלפיות";
+      let phaseSubtitle = `יום שלישי • 20/01/2026 • 07:00 • ${electionHebrewDate}`;
+      let phase = "open";
+
+      if (now >= targetOpen && now < targetClose) {
+        phase = "close";
+        phaseTarget = targetClose;
+        phaseTitle = "ספירה לאחור לסגירת הקלפיות";
+        phaseSubtitle = `יום שלישי • 20/01/2026 • 22:00 • ${electionHebrewDate}`;
+      }
+
+      if (now >= targetClose) {
+        root.classList.add("done");
+        grid.style.display = "none";
+        footer.innerHTML = `<div class="closedMessage">הקלפיות נסגרו</div>`;
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+        return;
+      }
+
+      const diffMs = phaseTarget.getTime() - now.getTime();
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      if (titleEl) titleEl.textContent = phaseTitle;
+      if (subtitleEl) subtitleEl.textContent = phaseSubtitle;
+
+      elDays.textContent = String(days);
+      elHours.textContent = pad2(hours);
+      elMinutes.textContent = pad2(minutes);
+      elSeconds.textContent = pad2(seconds);
+
+      // Footer: bold date without seconds
+      try {
+        const fmt = new Intl.DateTimeFormat("he-IL", {
+          timeZone: "Asia/Jerusalem",
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+        const parts = fmt.formatToParts(now).reduce((acc, p) => {
+          acc[p.type] = p.value;
+          return acc;
+        }, {});
+        const dayName = parts.weekday || "";
+        const day = parts.day || "";
+        const month = parts.month || "";
+        const year = parts.year || "";
+        const hour = parts.hour || "";
+        const minute = parts.minute || "";
+        
+        // Get Hebrew date using Intl
+        const hebrewFmt = new Intl.DateTimeFormat("he-IL-u-ca-hebrew", {
+          timeZone: "Asia/Jerusalem",
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        });
+        const hebrewDate = hebrewFmt.format(now);
+        
+        // Convert numbers to Hebrew letters (gematria style)
+        function numberToHebrew(num) {
+          const hebrewLetters = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י',
+            'יא', 'יב', 'יג', 'יד', 'טו', 'טז', 'יז', 'יח', 'יט', 'כ',
+            'כא', 'כב', 'כג', 'כד', 'כה', 'כו', 'כז', 'כח', 'כט', 'ל'];
+          return hebrewLetters[num] || num;
+        }
+        
+        // Convert Hebrew year number to Hebrew letters
+        function yearToHebrew(yearNum) {
+          // Thousands place - always ה (5)
+          const thousands = 'ה';
+          
+          // Remaining 3 digits (e.g., 786 from 5786)
+          const remaining = yearNum % 1000;
+          const hundreds = Math.floor(remaining / 100);
+          const tens = Math.floor((remaining % 100) / 10);
+          const ones = remaining % 10;
+          
+          // Map for hundreds (100-900)
+          const hundreds_map = {
+            1: 'ק', 2: 'ר', 3: 'ש', 4: 'ת', 5: 'תק',
+            6: 'תר', 7: 'תש', 8: 'תת', 9: 'תתק'
+          };
+          
+          // Map for tens (10-90)
+          const tens_map = {
+            1: 'י', 2: 'כ', 3: 'ל', 4: 'מ', 5: 'נ',
+            6: 'ס', 7: 'ע', 8: 'פ', 9: 'צ'
+          };
+          
+          // Map for ones (1-9)
+          const ones_map = {
+            1: 'א', 2: 'ב', 3: 'ג', 4: 'ד', 5: 'ה',
+            6: 'ו', 7: 'ז', 8: 'ח', 9: 'ט'
+          };
+          
+          let result = '';
+          if (hundreds > 0) result += hundreds_map[hundreds];
+          if (tens > 0) result += tens_map[tens];
+          if (ones > 0) result += ones_map[ones];
+          
+          // Add geresh before last letter if there are multiple letters
+          if (result.length > 1) {
+            result = result.slice(0, -1) + '״' + result.slice(-1);
+          }
+          
+          return thousands + '\'' + result;
+        }
+        
+        // Parse Hebrew date and format it
+        const hebrewParts = hebrewDate.split(' ');
+        if (hebrewParts.length >= 3) {
+          const hebrewDay = hebrewParts[0];
+          const hebrewMonth = hebrewParts[1];
+          const hebrewYear = hebrewParts[2];
+          
+          // Convert day number to Hebrew letters with geresh between digits
+          const dayNum = parseInt(hebrewDay);
+          let dayHebrew = '';
+          if (dayNum > 10) {
+            const tens = numberToHebrew(Math.floor(dayNum / 10) * 10);
+            const ones = numberToHebrew(dayNum % 10);
+            dayHebrew = tens + '״' + ones;
+          } else {
+            dayHebrew = numberToHebrew(dayNum) + '"';
+          }
+          
+          // Convert year to Hebrew letters
+          const yearNum = parseInt(hebrewYear);
+          const yearHebrew = yearToHebrew(yearNum);
+          
+          const formattedHebrew = `${dayHebrew} ${hebrewMonth} ${yearHebrew}`;
+          
+          footer.innerHTML = `${dayName} • ${day}/${month}/${year} • ${hour}:${minute}<br>${formattedHebrew}`;
+        } else {
+          footer.innerHTML = `${dayName} • ${day}/${month}/${year} • ${hour}:${minute}<br>${hebrewDate}`;
+        }
+      } catch {
+        footer.textContent = "";
+      }
+    }
+
+    update();
+    setInterval(update, 250); // smoother second transitions on some TVs
+  </script>
+</body>
+</html>
